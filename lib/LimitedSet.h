@@ -9,7 +9,7 @@
 #define LIMITEDSET_H_
 
 #include "conditional_assert.h"
-typedef unsigned int uint;
+#include "Rand.h"
 
 
 template <typename T, unsigned MAXIMUM>
@@ -89,7 +89,13 @@ public:
 		return LimitedSetIterator<T, MAXIMUM> (*this);
 	}
 
-	virtual ~LimitedSet();
+	T RandomElem(){
+		ASSERT(!Empty);
+		int rand  = Rand::next_rand(elem_count);
+		return elements[rand];
+	}
+
+	virtual ~LimitedSet() {}
 
 private:
 	uint elem_count;

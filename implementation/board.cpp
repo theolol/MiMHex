@@ -1,11 +1,11 @@
 #include "board.h"
 #include "conditional_assert.h"
+#include "../lib/Rand.h"
+#include "../lib/Types.h"
 #include <cstring>
 #include <sstream>
 
 namespace Hex {
-
-uint Rand::_seed;
 
 // -----------------------------------------------------------------------------
 
@@ -137,7 +137,8 @@ const Board Board::Empty() {
 	for (uint i = 0; i < table_size; i++) //make all fields empty
 		board._board[i] = 0;
 
-	for (uint i = kGuardsSize; i < kBoardSize+kGuardsSize; ++i) //horizontal top guards set to first player group
+	//horizontal top guards set to first player group
+	for (uint i = kGuardsSize; i < kBoardSize+kGuardsSize; ++i)
 		board._board[(kGuardsSize-1)*kBoardSizeAligned + i] = (kGuardsSize-1)*kBoardSizeAligned + kGuardsSize;
 
 	//horizontal bottom guards for first player
@@ -177,6 +178,7 @@ inline void Board::PlayLegal (const Move& move) {
 	uint replace_pos = _fast_field_map[--_moves_left];
 	_fast_field_map[fast_map_pos] = replace_pos;
 	_reverse_fast_field_map[replace_pos] = fast_map_pos;
+	UpdateBridges(pos);
 	_current = _current.Opponent();
 }
 
@@ -274,6 +276,14 @@ bool Board::IsValidMove(const Move& move) {
 	if (!Location::ValidPosition(move.GetLocation().GetPos()))
 		return false;
 	return _board[move.GetLocation().GetPos()] == 0;
+}
+
+void updateBridges(uint pos){
+	// UpdateExistingBridges(pos);
+	// FindNewBridges(pos);
+	// Własnie postawiliśmy pionek na pozycji pos
+	// trzeba dla wszystkich elementów w _bridges[pos] usunąć pos z listy mostów
+	// ale nie tykać _bridges[pos]
 }
 
 // -----------------------------------------------------------------------------

@@ -3,33 +3,14 @@
 
 #include <string>
 #include "../lib/LimitedSet.h"
-
-typedef unsigned int uint;
+#include "../lib/Rand.h"
+#include "../lib/Types.h"
 
 namespace Hex {
 
 const uint kBoardSize = 11;
 const uint kGuardsSize = 2;  // number of fild guards from on side only
 const uint kBoardSizeAligned = kBoardSize + kGuardsSize*2;	// proper fields + guards from both sides
-
-// -----------------------------------------------------------------------------
-
-class Rand {
-public:
-	static void init (uint seed) { _seed = seed; }
-	static uint next_rand() {
-		uint lo = 16807 * (_seed & 0xffff);
-		uint hi = 16807 * (_seed >> 16);
-		lo += (hi & 0x7fff) << 16;
-		lo += hi >> 15;
-		return _seed = (lo & 0x7FFFFFFF) + (lo >> 31);
-	}
-	static uint next_rand(uint n) {
-	  return ((next_rand() & 0xffff) * n) >> 16;
-	}
-private:
-	static uint _seed;
-};
 
 // -----------------------------------------------------------------------------
 
@@ -121,6 +102,7 @@ class Board {
   uint MakeUnion(uint pos1, uint pos2);
   uint Find(uint pos);
   uint ConstFind(uint pos) const;
+  void UpdateBridges(uint pos);
 
  private:
   static const uint table_size;
@@ -128,6 +110,7 @@ class Board {
   short _board[kBoardSizeAligned * kBoardSizeAligned];
   unsigned short _fast_field_map[kBoardSizeAligned * kBoardSizeAligned];
   unsigned short _reverse_fast_field_map[kBoardSizeAligned * kBoardSizeAligned];
+  LimitedSet<ushort, 3> _bridges[kBoardSizeAligned * kBoardSizeAligned];
   uint _moves_left;
   Player _current;
 };
