@@ -16,7 +16,6 @@
 
 int main(int argc, char* argv[]) {
 
-	std::cerr << "Test Gita. I drugi raz..I trzeci" << std::endl;
 	if ((argc & 1) == 0) {
 		std::cerr << "Usage: ./hex -param val -param val ..." << std::endl;
 		return 1;

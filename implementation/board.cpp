@@ -60,14 +60,16 @@ inline uint Location::GetPos() const { return _pos; }
 
 inline std::string Location::ToCoords() const {
 	std::stringstream coords;
-	coords << static_cast<char>(_pos % kBoardSizeAligned + 'a' - 1);
-	coords << _pos / kBoardSizeAligned;
+	uint x,y;
+	ToCoords(_pos, x, y);
+	coords << static_cast<char>(x + 'a' - 1);
+	coords << y;
 	return coords.str();
 }
 
 inline uint Location::ToTablePos(uint x, uint y) {
 	ASSERT (ValidLocation(x, y));
-	return y * (kBoardSizeAligned) + x;
+	return (y+kGuardsSize-1) * (kBoardSizeAligned) + x+ (kGuardsSize -1);
 }
 
 inline bool Location::operator==(Location loc) const {
@@ -99,8 +101,8 @@ inline bool Location::ValidLocation(uint x, uint y) {
 }
 
 inline void Location::ToCoords(uint pos, uint& x, uint& y) {
-	x = pos % kBoardSizeAligned;
-	y = pos / kBoardSizeAligned;
+	x = pos % kBoardSizeAligned + 1 - kGuardsSize;
+	y = pos / kBoardSizeAligned + 1 - kGuardsSize;
 }
 
 // -----------------------------------------------------------------------------
@@ -116,7 +118,7 @@ inline Player Move::GetPlayer() const { return _player; }
 
 // -----------------------------------------------------------------------------
 
-const uint Board::guarded_board_size = kBoardSize + 2;
+const uint Board::guarded_board_size = kBoardSize + 2*kGuardsSize;
 const uint Board::table_size = kBoardSizeAligned * kBoardSizeAligned;
 
 const Board Board::Empty() {
@@ -124,21 +126,30 @@ const Board Board::Empty() {
 	Board board;
 
 	uint counter = 0;
-	for (uint i = 1; i <= kBoardSize; ++i) {
-		for (uint j = 1; j <= kBoardSize; j++) {
+	for (uint i = kGuardsSize; i < kBoardSize + kGuardsSize; ++i) {
+		for (uint j = kGuardsSize; j < kBoardSize + kGuardsSize; j++) {
 			uint field = i * kBoardSizeAligned + j;
 			board._fast_field_map[counter] = field;
 			board._reverse_fast_field_map[field] = counter++;
 		}
 	}
 
-	for (uint i = 0; i < table_size; i++)
+	for (uint i = 0; i < table_size; i++) //make all fields empty
 		board._board[i] = 0;
-	for (uint i = 1; i <= kBoardSize; ++i)
-		board._board[i] = 1;
-	for (uint i = (guarded_board_size - 1) * kBoardSizeAligned + 1;
-			i < (guarded_board_size - 1) * (kBoardSizeAligned + 1); ++i) {
-		board._board[i] = (guarded_board_size - 1) * kBoardSizeAligned + 1;
+
+	for (uint i = kGuardsSize; i < kBoardSize+kGuardsSize; ++i) //horizontal top guards set to first player group
+		board._board[(kGuardsSize-1)*kBoardSizeAligned + i] = (kGuardsSize-1)*kBoardSizeAligned + kGuardsSize;
+
+	//horizontal bottom guards for first player
+	for (uint i = (guarded_board_size - kGuardsSize) * kBoardSizeAligned + kGuardsSize;
+			i < (guarded_board_size - kGuardsSize) * (kBoardSizeAligned + 1); ++i) {
+		board._board[i] = (guarded_board_size - kGuardsSize) * kBoardSizeAligned + kGuardsSize;
+	}
+	// left and right vertical guards for second player
+	for (uint i = kGuardsSize * kBoardSizeAligned + 1, j = 0; j < guarded_board_size - 2*kGuardsSize;
+			i += kBoardSizeAligned, j++) {
+		board._board[i] = -1;
+	    board._board[i + kBoardSize + 1] = -1;
 	}
 
 	return board;
@@ -199,8 +210,8 @@ inline bool Board::IsFull() const {
 }
 
 inline Player Board::Winner() const {
-	if (ConstFind(1) ==
-		ConstFind((guarded_board_size - 1) * kBoardSizeAligned + 1)) {
+	if (ConstFind((kGuardsSize-1)*kBoardSizeAligned + kGuardsSize) ==
+		ConstFind((guarded_board_size - kGuardsSize) * kBoardSizeAligned + kGuardsSize)) {
 			return Player::First();
 	}
 	else return Player::Second();

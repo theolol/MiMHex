@@ -8,7 +8,8 @@ typedef unsigned int uint;
 namespace Hex {
 
 const uint kBoardSize = 11;
-const uint kBoardSizeAligned = 13;	// kBoardSize + 2
+const uint kGuardsSize = 2;  // number of fild guards from on side only
+const uint kBoardSizeAligned = kBoardSize + kGuardsSize*2;	// proper fields + guards from both sides
 
 // -----------------------------------------------------------------------------
 
