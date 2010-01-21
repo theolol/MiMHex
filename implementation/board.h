@@ -2,6 +2,7 @@
 #define HEX_BOARD_H_
 
 #include <string>
+#include "../lib/LimitedSet.h"
 
 typedef unsigned int uint;
 
