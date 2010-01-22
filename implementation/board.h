@@ -87,6 +87,7 @@ class Board {
 
   Board();
   Player CurrentPlayer() const;
+  Move DefendBridgeMove(const Player&) const;
   Move RandomLegalMove (const Player&) const;
   void PlayLegal (const Move&);
   bool IsFull() const;
@@ -96,6 +97,8 @@ class Board {
   void GetPossiblePositions(ushort_ptr& locations);
   std::string ToAsciiArt(Location last_move) const;
   bool IsValidMove(const Move& move);
+  LimitedSet<uint, 3> _bridges[kBoardSizeAligned * kBoardSizeAligned]; // TODO private
+  short _board[kBoardSizeAligned * kBoardSizeAligned]; //TODO private
 
  private:
   void MakeUnion(uint pos);
@@ -103,14 +106,18 @@ class Board {
   uint Find(uint pos);
   uint ConstFind(uint pos) const;
   void UpdateBridges(uint pos);
+  void UpdateExistingBridges(uint pos);
+  void FindNewBridges(uint pos);
+  void CheckPossibleBridge(uint pos, uint mate, uint empty1, uint empty2);
 
  private:
   static const uint table_size;
   static const uint guarded_board_size;
-  short _board[kBoardSizeAligned * kBoardSizeAligned];
+
   unsigned short _fast_field_map[kBoardSizeAligned * kBoardSizeAligned];
   unsigned short _reverse_fast_field_map[kBoardSizeAligned * kBoardSizeAligned];
-  LimitedSet<ushort, 3> _bridges[kBoardSizeAligned * kBoardSizeAligned];
+
+  LimitedSet<uint, 50> attacked_bridges;
   uint _moves_left;
   Player _current;
 };

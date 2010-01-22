@@ -21,8 +21,8 @@ class LimitedSetIterator{
 public:
 
 	T Next(){
-		ASSERT(!Last());
-		return set[++position];
+		ASSERT(!End());
+		return set.elements[position++];
 	}
 
 	T Get(){
@@ -30,18 +30,14 @@ public:
 		return set[position];
 	}
 
-	bool Last() {
-		return position + 1 == set.elem_count;
-	}
-
 	bool End() {
 		return position >= set.elem_count;
 	}
 
 private:
-	LimitedSet<T, MAXIMUM> set;
-	int position;
 	LimitedSetIterator(const LimitedSet<T, MAXIMUM>& set_itr) : position(0), set(set_itr) { }
+	uint position;
+	LimitedSet<T, MAXIMUM> set;
 	friend class LimitedSet<T, MAXIMUM>;
 };
 
@@ -65,12 +61,12 @@ public:
 		}
 	}
 
-	bool IsFull() {
+	bool IsFull() const {
 		return elem_count >= MAXIMUM;
 	}
 
-	bool Contains(T& elem) {
-		for (int i=0; i<elem_count; ++i){
+	bool Contains(T& elem) const {
+		for (uint i=0; i<elem_count; ++i){
 			if (elements[i] == elem)
 				return true;
 		}
@@ -81,16 +77,20 @@ public:
 		elem_count = 0;
 	}
 
-	bool Empty(){
+	bool Empty() const{
 		return elem_count == 0;
+	}
+
+	int Size() const{
+		return (int) elem_count;
 	}
 
 	LimitedSetIterator<T, MAXIMUM> GetIterator(){
 		return LimitedSetIterator<T, MAXIMUM> (*this);
 	}
 
-	T RandomElem(){
-		ASSERT(!Empty);
+	T RandomElem() const{
+		ASSERT(!Empty());
 		int rand  = Rand::next_rand(elem_count);
 		return elements[rand];
 	}
@@ -102,12 +102,13 @@ private:
 	T elements[MAXIMUM];
 
 	uint GetPosition(T& elem){
-		for (int i=0; i<elem_count; ++i){
+		for (uint i=0; i<elem_count; ++i){
 			if (elements[i] == elem)
 				return i;
 		}
 		return InvalidPosition;
 	}
+	friend class LimitedSetIterator<T, MAXIMUM>;
 };
 
 #endif /* BRIDGESET_H_ */

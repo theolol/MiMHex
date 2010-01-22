@@ -4,6 +4,7 @@
 #include "../lib/Types.h"
 #include <cstring>
 #include <sstream>
+#include <iostream>
 
 namespace Hex {
 
@@ -167,6 +168,7 @@ Move Board::RandomLegalMove (const Player& player) const {
 
 inline void Board::PlayLegal (const Move& move) {
 	ASSERT(IsValidMove(move));
+	ASSERT(move.GetPlayer() == _current);
 	uint pos = move.GetLocation().GetPos();
 	if (move.GetPlayer() == Player::First()) {
 		_board[pos] = pos;
@@ -278,13 +280,79 @@ bool Board::IsValidMove(const Move& move) {
 	return _board[move.GetLocation().GetPos()] == 0;
 }
 
-void updateBridges(uint pos){
-	// UpdateExistingBridges(pos);
-	// FindNewBridges(pos);
+
+void Board::UpdateBridges(uint pos){
+	 UpdateExistingBridges(pos);
+	 FindNewBridges(pos);
+	 attacked_bridges.Remove(pos);
 	// Własnie postawiliśmy pionek na pozycji pos
 	// trzeba dla wszystkich elementów w _bridges[pos] usunąć pos z listy mostów
 	// ale nie tykać _bridges[pos]
 }
+
+void Board::UpdateExistingBridges(uint pos){
+	LimitedSetIterator<uint, 3> it = _bridges[pos].GetIterator();
+	while (!it.End()){
+		uint elem = it.Next();
+		attacked_bridges.Insert(elem);
+		_bridges[elem].Remove(pos);
+	}
+}
+
+void Board::FindNewBridges(uint pos){
+	uint mate = pos - 2*kBoardSizeAligned + 1;
+	uint empty1 = pos - kBoardSizeAligned;
+	uint empty2 = pos - kBoardSizeAligned + 1;
+	CheckPossibleBridge(pos, mate, empty1, empty2);
+
+	mate = pos - kBoardSizeAligned + 2;
+	empty1 = empty2;
+	empty2 = pos +1;
+	CheckPossibleBridge(pos, mate, empty1, empty2);
+
+	mate = pos + kBoardSizeAligned + 1;
+	empty1 = empty2;
+	empty2 = pos + kBoardSizeAligned;
+	CheckPossibleBridge(pos, mate, empty1, empty2);
+
+	mate = pos + 2*kBoardSizeAligned - 1;
+	empty1 = empty2;
+	empty2 = empty2 -1;
+	CheckPossibleBridge(pos, mate, empty1, empty2);
+
+	mate = pos + kBoardSizeAligned -2;
+	empty1 = empty2;
+	empty2 = pos - 1;
+	CheckPossibleBridge(pos, mate, empty1, empty2);
+
+	mate = pos - kBoardSizeAligned - 1;
+	empty1 = empty2;
+	empty2 = pos - kBoardSizeAligned;
+	CheckPossibleBridge(pos, mate, empty1, empty2);
+}
+
+void Board::CheckPossibleBridge(uint pos, uint mate,uint empty1,uint empty2){
+	if (_board[pos]*_board[mate] > 0){ //belongs to the same player
+		if (_board[empty1] == 0 && _board[empty2] == 0){
+			_bridges[empty1].Insert(empty2);
+			_bridges[empty2].Insert(empty1);
+		}
+	}
+}
+
+//If bride exists -> defendig move, else -> random move
+Move Board::DefendBridgeMove(const Player& player) const {
+	if (!attacked_bridges.Empty()){
+		return Move(player, Location(attacked_bridges.RandomElem()));
+	}
+	return RandomLegalMove(player);
+}
+
+
+
+
+
+
 
 // -----------------------------------------------------------------------------
 

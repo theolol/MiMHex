@@ -4,7 +4,7 @@
 namespace Hex {
 
 const uint MCTSTree::default_max_depth = -1;
-const uint MCTSTree::default_playouts_per_move = 10000;
+const uint MCTSTree::default_playouts_per_move = 100000;
 const uint MCTSTree::ultimate_depth = kBoardSize * kBoardSize;
 const uint MCTSTree::visits_to_expand = 10;
 
@@ -110,7 +110,8 @@ Player MCTSTree::RandomFinish(Board& board, uint* path,
 
 	while (!board.IsFull()) {
 	  Player pl = board.CurrentPlayer();
-	  Move move = board.RandomLegalMove(pl);
+//	  Move move = board.RandomLegalMove(pl);
+	  Move move = board.DefendBridgeMove(pl); // Bridge Version
 	  path[++current_level] = move.GetLocation().GetPos();
 	  board.PlayLegal(move);
 	}

@@ -18,6 +18,17 @@ void Game::Play(const Move& move) {
 	ASSERT(current_board.IsValidMove(move));
 	current_board.PlayLegal(move);
 	last_move = move.GetLocation();
+	//TODO wywalić wypisywanie mostów
+//	for (uint i=0; i< kBoardSizeAligned * kBoardSizeAligned; ++i){
+//		if (!current_board._bridges[i].Empty() && current_board._board[i] == 0){
+//			std::cerr << "Most dla "<< Location(i).ToCoords() << " to:" ;
+//			LimitedSetIterator<uint, 3> it = current_board._bridges[i].GetIterator();
+//			while (!it.End()){
+//				std::cerr << Location(it.Next()).ToCoords();
+//			}
+//			std::cerr << std::endl;
+//		}
+//	}
 }
 
 Move Game::GenMove(Player player) {
